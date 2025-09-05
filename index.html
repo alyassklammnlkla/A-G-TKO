@@ -1,24 +1,36 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-G TKO</title>
+    <!-- Content-Security-Policy for Electron compatibility -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com;">
+    <title>A-G TKO - Smart Template Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Tajawal', sans-serif; }
-        .bg-gradient-custom {
-            background-image: linear-gradient(135deg, var(--tw-gradient-stops));
+        body {
+            font-family: 'Tajawal', sans-serif;
         }
-        .toast { animation: fadeInOut 3.5s ease-in-out forwards; }
+        .bg-pattern {
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+        .toast {
+            animation: fadeInOut 3.5s ease-in-out forwards;
+        }
         @keyframes fadeInOut {
             0%, 100% { opacity: 0; transform: translateY(-20px); }
             10%, 90% { opacity: 1; transform: translateY(0); }
         }
-        .modal-content { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
         
         body.preview-mode #initial-view { display: none; }
         body:not(.preview-mode) #preview-container, body:not(.preview-mode) #fab-container { display: none; }
@@ -28,135 +40,148 @@
             border: none; z-index: 10;
         }
         .text-glow {
-            text-shadow: 0 0 8px rgba(99, 102, 241, 0.7);
+            text-shadow: 0 0 12px rgba(99, 102, 241, 0.8), 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+        .fab-menu-item {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        .dark .fab-menu-item {
+            background-color: rgba(30, 41, 59, 0.8);
         }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-500">
 
-    <div id="toast-container" class="fixed top-5 right-5 z-[100]"></div>
+    <div id="toast-container" class="fixed top-5 left-5 z-[100]"></div>
     
-    <!-- رسالة المودال المخصصة (بديل لـ alert و confirm) -->
-    <div id="modal-container" class="fixed inset-0 z-[200] hidden flex items-center justify-center bg-black bg-opacity-70">
-        <div class="bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-sm">
-            <h3 id="modal-title-custom" class="text-xl font-bold mb-4 text-yellow-500"></h3>
+    <!-- Custom Modal -->
+    <div id="modal-container" class="fixed inset-0 z-[200] hidden flex items-center justify-center bg-black bg-opacity-70 p-4">
+        <div class="modal-content bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl w-full max-w-sm border border-slate-200 dark:border-slate-700">
+            <h3 id="modal-title-custom" class="text-xl font-bold mb-4 text-indigo-500 dark:text-indigo-400"></h3>
             <p id="modal-message-custom" class="mb-6"></p>
-            <div id="modal-actions-custom" class="flex justify-end space-x-2 space-x-reverse">
-                <button id="modal-ok-custom" class="px-4 py-2 rounded-xl text-white font-semibold bg-blue-600 hover:bg-blue-700 transition">موافق</button>
+            <div id="modal-actions-custom" class="flex justify-end">
+                <button id="modal-ok-custom" class="px-5 py-2 rounded-xl text-white font-semibold bg-indigo-600 hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/20">OK</button>
             </div>
         </div>
     </div>
 
-
-    <div id="initial-view" class="flex items-center justify-center min-h-screen p-4">
-        <div class="text-center p-8 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full transform transition-all duration-300 hover:scale-105">
+    <!-- Initial View -->
+    <div id="initial-view" class="flex items-center justify-center min-h-screen p-4 bg-pattern">
+        <div class="text-center p-8 bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl shadow-2xl max-w-lg w-full transform transition-all duration-300 hover:scale-105 border border-slate-200 dark:border-slate-700">
             <i class="fas fa-magic-wand-sparkles text-6xl text-indigo-500 mb-4 animate-pulse"></i>
-            <h1 class="text-3xl font-bold mb-2 text-glow">محرر A-G TKO</h1>
-            <p class="text-slate-500 dark:text-slate-400 mb-6">ارفع قالبك، انقر للتعديل، أضف مشاريع جديدة لأقسام مخصصة، وغير بريدك بضغطة زر.</p>
+            <h1 class="text-4xl font-extrabold mb-3 text-glow bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">A-G TKO Editor</h1>
+            <p class="text-slate-500 dark:text-slate-400 mb-8">Upload your template, enable editing, click to change, and unleash your creativity.</p>
             
-            <div class="mb-6 p-4 rounded-xl bg-indigo-500 bg-opacity-10 dark:bg-slate-700">
-                <p class="font-bold text-indigo-500 dark:text-indigo-400">الشهر الحالي:</p>
-                <p id="current-month" class="text-2xl font-extrabold mt-1 text-indigo-600 dark:text-indigo-300"></p>
+            <div class="mb-8 p-4 rounded-xl bg-indigo-50 dark:bg-slate-700/50 border border-indigo-200 dark:border-slate-600">
+                <p class="font-bold text-indigo-600 dark:text-indigo-400">Current Month:</p>
+                <p id="current-month" class="text-2xl font-extrabold mt-1 text-indigo-700 dark:text-indigo-300"></p>
             </div>
 
-            <label for="htmlUploader" class="w-full inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl cursor-pointer transition duration-300 transform hover:scale-105 shadow-lg">
-                <i class="fas fa-upload ml-2"></i> اختر قالب HTML
+            <label for="htmlUploader" class="w-full inline-block bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl cursor-pointer transition duration-300 transform hover:scale-105 shadow-lg shadow-indigo-500/30">
+                <i class="fas fa-upload mr-2"></i> Choose HTML Template
             </label>
             <input type="file" id="htmlUploader" class="hidden" accept=".html,.htm">
         </div>
     </div>
 
+    <!-- Preview Container -->
     <div id="preview-container">
-        <iframe id="previewFrame" class="w-full h-full bg-white" title="معاينة القالب"></iframe>
+        <iframe id="previewFrame" class="w-full h-full bg-white" title="Template Preview"></iframe>
     </div>
     
-    <div id="fab-container" class="fixed bottom-8 left-8 z-50">
-        <div id="fab-menu" class="mb-3 hidden">
-            <div class="flex flex-col items-start space-y-3">
-                 <button id="add-project-btn" class="flex items-center bg-white dark:bg-slate-700 px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-right">
-                    <i class="fas fa-plus-circle text-green-500 ml-2"></i> <span>إضافة مشروع جديد</span>
-                </button>
-                 <button id="replace-email-btn" class="flex items-center bg-white dark:bg-slate-700 px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-right">
-                    <i class="fas fa-at text-purple-500 ml-2"></i> <span>استبدال بريد FormSubmit</span>
-                </button>
-                <button onclick="exportTemplate()" class="flex items-center bg-white dark:bg-slate-700 px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-right">
-                    <i class="fas fa-file-export text-indigo-500 ml-2"></i> <span>تصدير القالب</span>
-                </button>
-                <button onclick="toggleTheme()" class="flex items-center bg-white dark:bg-slate-700 px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-right">
-                    <i id="theme-icon" class="fas fa-moon text-yellow-500 ml-2"></i> <span id="theme-text">الوضع الداكن</span>
-                </button>
-                <button onclick="location.reload()" class="flex items-center bg-white dark:bg-slate-700 px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-right">
-                    <i class="fas fa-sync-alt text-sky-500 ml-2"></i> <span>رفع قالب جديد</span>
-                </button>
-            </div>
+    <!-- Floating Action Button & Menu -->
+    <div id="fab-container" class="fixed bottom-8 right-8 z-50">
+        <div id="fab-menu" class="mb-3 hidden flex flex-col items-end space-y-3">
+              <button id="toggle-edit-btn" class="fab-menu-item flex items-center px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-left">
+                  <span id="toggle-edit-text">Disable Editing</span><i id="toggle-edit-icon" class="fas fa-eye-slash text-red-500 ml-3"></i> 
+              </button>
+              <button id="add-project-btn" class="fab-menu-item flex items-center px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-left">
+                  <span>Add Project</span><i class="fas fa-plus-circle text-green-500 ml-3"></i> 
+              </button>
+              <button id="replace-email-btn" class="fab-menu-item flex items-center px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-left">
+                  <span>Replace Email</span><i class="fas fa-at text-purple-500 ml-3"></i> 
+              </button>
+              <button onclick="exportTemplate()" class="fab-menu-item flex items-center px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-left">
+                  <span>Export Template</span><i class="fas fa-file-export text-indigo-500 ml-3"></i> 
+              </button>
+              <button onclick="toggleTheme()" class="fab-menu-item flex items-center px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-left">
+                  <span id="theme-text">Dark Mode</span><i id="theme-icon" class="fas fa-moon text-yellow-500 ml-3"></i> 
+              </button>
+              <button onclick="location.reload()" class="fab-menu-item flex items-center px-4 py-2 rounded-xl shadow-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition w-full text-left">
+                  <span>Upload New</span><i class="fas fa-sync-alt text-sky-500 ml-3"></i> 
+              </button>
         </div>
-        <button id="fab-btn" class="w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-xl hover:bg-indigo-700 transition transform hover:rotate-45">
+        <button id="fab-btn" class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center text-2xl shadow-xl hover:bg-indigo-700 transition transform hover:rotate-45">
             <i class="fas fa-cogs"></i>
         </button>
     </div>
 
+    <!-- Edit Modal -->
     <div id="edit-modal" class="fixed inset-0 z-[60] bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
-        <div class="modal-content bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div class="modal-content bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700">
             <div class="flex justify-between items-center mb-4 border-b pb-3 dark:border-slate-600">
                 <h2 id="modal-title" class="text-xl font-bold text-indigo-500"></h2>
                 <button id="close-modal-btn" class="text-slate-400 hover:text-red-500 text-2xl">&times;</button>
             </div>
             <div class="space-y-4">
-                <div>
-                    <label for="editText" class="block mb-1 font-semibold text-sm">عنوان المشروع</label>
+                <div id="text-section">
+                    <label for="editText" class="block mb-1 font-semibold text-sm">Text (Title)</label>
                     <textarea id="editText" rows="2" class="w-full p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
                 </div>
-                <div>
-                    <label for="editLink" class="block mb-1 font-semibold text-sm">الرابط (URL)</label>
+                <div id="link-section">
+                    <label for="editLink" class="block mb-1 font-semibold text-sm">Link (URL)</label>
                     <input type="url" id="editLink" class="w-full p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
-                 <div id="category-section" class="hidden">
-                    <label for="editCategory" class="block mb-1 font-semibold text-sm">القسم (Category)</label>
+                <div id="category-section" class="hidden">
+                    <label for="editCategory" class="block mb-1 font-semibold text-sm">Category</label>
                     <select id="editCategory" class="w-full p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></select>
-                    <p class="text-xs text-slate-500 mt-2">أو أضف قسماً جديداً:</p>
-                    <input type="text" id="newCategory" placeholder="مثال: تصاميم رقمية" class="w-full text-sm mt-1 p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <p class="text-xs text-slate-500 mt-2">Or add a new category:</p>
+                    <input type="text" id="newCategory" placeholder="Example: Digital Designs" class="w-full text-sm mt-1 p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
-                <div>
-                    <label class="block mb-1 font-semibold text-sm">الصورة</label>
-                    <div class="flex items-center space-x-4 space-x-reverse">
+                <div id="image-section">
+                    <label class="block mb-1 font-semibold text-sm">Image</label>
+                    <div class="flex items-center space-x-4">
                         <img id="image-preview" src="https://placehold.co/100x100/e2e8f0/94a3b8?text=Preview" alt="Preview" class="w-24 h-24 rounded-xl object-cover border dark:border-slate-600">
                         <div class="flex-1">
-                             <label for="editImageFile" class="w-full text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-sm font-medium py-2 px-3 rounded-xl cursor-pointer transition">
-                                <i class="fas fa-cloud-upload-alt ml-2"></i> رفع صورة جديدة
+                            <label for="editImageFile" class="w-full text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-sm font-medium py-2 px-3 rounded-xl cursor-pointer transition">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i> Upload New Image
                             </label>
                             <input type="file" id="editImageFile" class="hidden" accept="image/*">
-                            <p class="text-xs text-slate-500 mt-2">أو قم بلصق رابط صورة:</p>
-                             <input type="url" id="editImageUrl" class="w-full text-sm mt-1 p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                         </div>
+                            <p class="text-xs text-slate-500 mt-2">Or paste an image link:</p>
+                            <input type="url" id="editImageUrl" class="w-full text-sm mt-1 p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="mt-6 pt-4 border-t dark:border-slate-600 flex justify-end space-x-3 space-x-reverse">
-                <button id="cancel-edit-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition">إلغاء</button>
-                <button id="apply-changes-btn" class="px-6 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition font-bold">تطبيق</button>
+            <div class="mt-6 pt-4 border-t dark:border-slate-600 flex justify-end space-x-3">
+                <button id="cancel-edit-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 transition">Cancel</button>
+                <button id="apply-changes-btn" class="px-6 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition font-bold shadow-lg shadow-indigo-500/20">Apply</button>
             </div>
         </div>
     </div>
     
+    <!-- Email Modal -->
     <div id="email-modal" class="fixed inset-0 z-[60] bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
-        <div class="modal-content bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-sm">
-             <div class="flex justify-between items-center mb-4 border-b pb-3 dark:border-slate-600">
-                <h2 class="text-xl font-bold text-purple-500"><i class="fas fa-at ml-2"></i>استبدال بريد FormSubmit</h2>
-                <button id="close-email-modal-btn" class="text-slate-400 hover:text-red-500 text-2xl">&times;</button>
-            </div>
-            <div>
-                <label for="new-email-input" class="block mb-2 font-semibold text-sm">البريد الإلكتروني الجديد</label>
-                <input type="email" id="new-email-input" placeholder="enter.new@email.com" class="w-full p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                <p class="text-xs text-slate-500 mt-2">سيتم تحديث رابط FormSubmit وكل رسائل البريد الظاهرة.</p>
-            </div>
-            <div class="mt-6 pt-4 border-t dark:border-slate-600 flex justify-end space-x-3 space-x-reverse">
-                 <button id="cancel-email-change-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition">إلغاء</button>
-                <button id="apply-email-change-btn" class="px-6 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition font-bold">استبدال</button>
-            </div>
+        <div class="modal-content bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-700">
+              <div class="flex justify-between items-center mb-4 border-b pb-3 dark:border-slate-600">
+                  <h2 class="text-xl font-bold text-purple-500"><i class="fas fa-at mr-2"></i>Replace FormSubmit Email</h2>
+                  <button id="close-email-modal-btn" class="text-slate-400 hover:text-red-500 text-2xl">&times;</button>
+              </div>
+              <div>
+                  <label for="new-email-input" class="block mb-2 font-semibold text-sm">New Email Address</label>
+                  <input type="email" id="new-email-input" placeholder="enter.new@email.com" class="w-full p-2 border rounded-xl dark:bg-slate-700 dark:border-slate-600 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                  <p class="text-xs text-slate-500 mt-2">The FormSubmit link and all visible emails will be updated.</p>
+              </div>
+              <div class="mt-6 pt-4 border-t dark:border-slate-600 flex justify-end space-x-3">
+                   <button id="cancel-email-change-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 transition">Cancel</button>
+                  <button id="apply-email-change-btn" class="px-6 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition font-bold shadow-lg shadow-purple-500/20">Replace</button>
+              </div>
         </div>
     </div>
 
     <script>
+        // DOM Elements
         const body = document.body;
         const htmlUploader = document.getElementById('htmlUploader');
         const previewFrame = document.getElementById('previewFrame');
@@ -169,12 +194,19 @@
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
         const applyChangesBtn = document.getElementById('apply-changes-btn');
         const addProjectBtn = document.getElementById('add-project-btn');
+        
+        // Modal Sections
+        const textSection = document.getElementById('text-section');
+        const linkSection = document.getElementById('link-section');
+        const imageSection = document.getElementById('image-section');
+        const categorySection = document.getElementById('category-section');
+
+        // Modal Inputs
         const editText = document.getElementById('editText');
         const editLink = document.getElementById('editLink');
         const imagePreview = document.getElementById('image-preview');
         const editImageFile = document.getElementById('editImageFile');
         const editImageUrl = document.getElementById('editImageUrl');
-        const categorySection = document.getElementById('category-section');
         const editCategory = document.getElementById('editCategory');
         const newCategory = document.getElementById('newCategory');
 
@@ -193,79 +225,75 @@
         const currentMonthElement = document.getElementById('current-month');
         const themeIcon = document.getElementById('theme-icon');
         const themeText = document.getElementById('theme-text');
+
+        const toggleEditBtn = document.getElementById('toggle-edit-btn');
+        const toggleEditText = document.getElementById('toggle-edit-text');
+        const toggleEditIcon = document.getElementById('toggle-edit-icon');
         
+        // State Variables
         let currentHtmlContent = '';
         let currentFileName = 'template.html';
         let activeEditingElement = null;
         let newBase64Image = null;
         let modalMode = 'edit';
+        let isEditModeActive = true; 
         
-        const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-        // Set initial theme based on localStorage or system preference
+        // --- Theme Management ---
         function initializeTheme() {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
                 body.classList.add('dark');
                 updateThemeToggle(true);
             } else {
-                document.documentElement.classList.remove('dark');
                 body.classList.remove('dark');
                 updateThemeToggle(false);
             }
         }
 
-        // Update theme toggle button text and icon
         function updateThemeToggle(isDark) {
             if (isDark) {
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-                themeIcon.classList.remove('text-yellow-500');
-                themeIcon.classList.add('text-yellow-400');
-                themeText.textContent = 'الوضع النهاري';
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+                themeIcon.classList.replace('text-yellow-500', 'text-yellow-400');
+                themeText.textContent = 'Light Mode';
             } else {
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
-                themeIcon.classList.remove('text-yellow-400');
-                themeIcon.classList.add('text-yellow-500');
-                themeText.textContent = 'الوضع الداكن';
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+                themeIcon.classList.replace('text-yellow-400', 'text-yellow-500');
+                themeText.textContent = 'Dark Mode';
             }
         }
 
         function toggleTheme() {
             const isDark = body.classList.toggle('dark');
-            if (isDark) {
-                localStorage.setItem('theme', 'dark');
-            } else {
-                localStorage.setItem('theme', 'light');
-            }
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
             updateThemeToggle(isDark);
         }
 
+        // --- UI Utilities (Modals & Toasts) ---
         function showCustomModal(title, message) {
             customModalTitle.textContent = title;
             customModalMessage.textContent = message;
             customModal.classList.remove('hidden');
         }
         
-        customModalOkBtn.addEventListener('click', () => {
-            customModal.classList.add('hidden');
-        });
+        customModalOkBtn.addEventListener('click', () => customModal.classList.add('hidden'));
 
         function showToast(message, isSuccess = true) {
             const toast = document.createElement('div');
-            toast.className = `toast text-white px-6 py-3 rounded-xl shadow-lg ${isSuccess ? 'bg-green-500' : 'bg-red-500'}`;
+            const bgColor = isSuccess ? 'bg-green-500' : 'bg-red-500';
+            toast.className = `toast text-white px-6 py-3 rounded-xl shadow-lg ${bgColor}`;
             toast.textContent = message;
             document.getElementById('toast-container').appendChild(toast);
             setTimeout(() => toast.remove(), 4000);
         }
 
+        // --- Core Editor Logic ---
         function reloadIframe(andInjectIds = false) {
              if(andInjectIds){
                  const parser = new DOMParser();
                  const doc = parser.parseFromString(currentHtmlContent, 'text/html');
-                 doc.querySelectorAll('a, h1, h2, h3, h4, p, span, img, .portfolio-item, .info-item p, .profile-title').forEach((el, index) => {
+                 doc.querySelectorAll('a, h1, h2, h3, h4, p, span, img, li, strong, em, b, i, .portfolio-item, .info-item p, .profile-title').forEach((el, index) => {
                      if(el.closest('script, style, head')) return;
                      if(!el.hasAttribute('data-editor-id')) {
                          el.setAttribute('data-editor-id', `el-${Date.now()}-${index}`);
@@ -274,8 +302,8 @@
                  currentHtmlContent = doc.documentElement.outerHTML;
              }
              previewFrame.srcdoc = currentHtmlContent;
-             previewFrame.onload = () => injectEditModeStyles();
-        }
+             previewFrame.onload = () => updateIframeStyles();
+         }
 
         function enterPreviewMode() {
             body.classList.add('preview-mode');
@@ -284,32 +312,46 @@
 
         function exportTemplate() {
             const tempDoc = new DOMParser().parseFromString(currentHtmlContent, 'text/html');
-            tempDoc.querySelectorAll('[data-editor-id]').forEach(el => el.removeAttribute('data-editor-id'));
+            tempDoc.querySelectorAll('[data-editor-id], #editor-styles').forEach(el => el.remove());
             const finalHtml = tempDoc.documentElement.outerHTML;
 
             const blob = new Blob([finalHtml], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
+            a.href = URL.createObjectURL(blob);
             a.download = `edited-${currentFileName}`;
             a.click();
-            URL.revokeObjectURL(url);
-            showToast('تم تصدير القالب بنجاح!', true);
+            URL.revokeObjectURL(a.href);
+            showToast('Template exported successfully!', true);
         }
 
-        function injectEditModeStyles() {
+        // --- Edit Mode Management ---
+        function updateIframeStyles() {
             try {
                 const iframeDoc = previewFrame.contentWindow.document;
                 if (!iframeDoc) return;
+                
                 let style = iframeDoc.getElementById('editor-styles');
-                if(!style){
+                if (!style) {
                     style = iframeDoc.createElement('style');
                     style.id = 'editor-styles';
                     iframeDoc.head.appendChild(style);
                 }
-                style.textContent = `[data-editor-id]:hover { outline: 2px dashed #3b82f6 !important; cursor: pointer !important; }`;
+
+                if (isEditModeActive) {
+                    style.textContent = `
+                        [data-editor-id]:hover { 
+                            outline: 2px dashed #4f46e5 !important; 
+                            cursor: pointer !important; 
+                            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5) !important;
+                            transition: all 0.2s ease-in-out;
+                        }
+                    `;
+                } else {
+                    style.textContent = '';
+                }
 
                 iframeDoc.body.addEventListener('click', (e) => {
+                    if (!isEditModeActive) return;
                     const target = e.target.closest('[data-editor-id]');
                     if (target) {
                         e.preventDefault();
@@ -317,16 +359,32 @@
                         openEditModalFor(target);
                     }
                 }, true);
+
             } catch (error) { console.error("Iframe access error:", error); }
         }
-        
+
+        function toggleEditMode() {
+            isEditModeActive = !isEditModeActive;
+            if (isEditModeActive) {
+                toggleEditText.textContent = "Disable Editing";
+                toggleEditIcon.className = "fas fa-eye-slash text-red-500 ml-3";
+                showToast('Edit mode enabled', true);
+            } else {
+                toggleEditText.textContent = "Enable Editing";
+                toggleEditIcon.className = "fas fa-edit text-blue-500 ml-3";
+                showToast('Edit mode disabled', false);
+            }
+            updateIframeStyles();
+        }
+
+        // --- Modal & Editing Logic ---
         function populateCategories(doc, currentCategory = '') {
             editCategory.innerHTML = '';
-            const filterButtons = doc.querySelectorAll('.portfolio-filter .filter-btn');
+            const filterButtons = doc.querySelectorAll('.portfolio-filter .filter-btn, [data-filter]');
             const categories = new Set();
             filterButtons.forEach(btn => {
                 const category = btn.dataset.filter;
-                if (category && category !== 'all') categories.add(category);
+                if (category && category.toLowerCase() !== 'all') categories.add(category);
             });
             
             categories.forEach(cat => {
@@ -341,30 +399,35 @@
         function openEditModalFor(target) {
             const id = target.getAttribute('data-editor-id');
             const isProject = target.closest('.portfolio-item');
-            
+            const isImage = target.tagName === 'IMG';
+
+            // Reset modal form
+            [textSection, linkSection, imageSection, categorySection].forEach(s => s.style.display = 'none');
             modalMode = 'edit';
-            categorySection.style.display = isProject ? 'block' : 'none';
-            modalTitle.innerHTML = `<i class="fas fa-edit ml-2"></i>تعديل العنصر`;
 
-            let textContent, linkUrl, imageUrl, projectCategory;
+            let textContent = '', linkUrl = '', imageUrl = '', projectCategory = '';
             
-            if(isProject){
-                const titleEl = isProject.querySelector('.portfolio-title');
-                textContent = titleEl ? titleEl.textContent.trim() : '';
-                
-                const linkEl = isProject.querySelector('a');
-                linkUrl = linkEl ? linkEl.href : '';
+            if (isProject) {
+                modalTitle.innerHTML = `<i class="fas fa-edit mr-2"></i>Edit Project`;
+                [textSection, linkSection, imageSection, categorySection].forEach(s => s.style.display = 'block');
 
-                const imageEl = isProject.querySelector('img');
-                imageUrl = imageEl ? imageEl.src : '';
-                
+                textContent = isProject.querySelector('.portfolio-title')?.textContent.trim() ?? '';
+                linkUrl = isProject.querySelector('a')?.href ?? '';
+                imageUrl = isProject.querySelector('img')?.src ?? '';
                 projectCategory = isProject.dataset.category;
                 populateCategories(previewFrame.contentWindow.document, projectCategory);
-            } else {
+            } else if (isImage) {
+                 modalTitle.innerHTML = `<i class="fas fa-image mr-2"></i>Edit Image`;
+                 [linkSection, imageSection].forEach(s => s.style.display = 'block');
+                
+                 linkUrl = target.closest('a')?.href ?? '';
+                 imageUrl = target.src;
+            } else { // It's a text element
+                 modalTitle.innerHTML = `<i class="fas fa-pencil-alt mr-2"></i>Edit Text`;
+                 [textSection, linkSection].forEach(s => s.style.display = 'block');
+
                 textContent = target.textContent.trim();
-                const parentLink = target.closest('a');
-                linkUrl = parentLink ? parentLink.href : (target.href || '');
-                imageUrl = target.tagName === 'IMG' ? target.src : null;
+                linkUrl = target.closest('a')?.href ?? (target.href || '');
             }
 
             activeEditingElement = { id, isProject };
@@ -381,8 +444,8 @@
         
         function openAddProjectModal() {
             modalMode = 'add';
-            modalTitle.innerHTML = `<i class="fas fa-plus-circle ml-2"></i>إضافة مشروع جديد`;
-            categorySection.style.display = 'block';
+            modalTitle.innerHTML = `<i class="fas fa-plus-circle mr-2"></i>Add New Project`;
+            [textSection, linkSection, imageSection, categorySection].forEach(s => s.style.display = 'block');
             populateCategories(previewFrame.contentWindow.document);
 
             activeEditingElement = null;
@@ -392,7 +455,8 @@
             newBase64Image = null;
             editModal.classList.remove('hidden');
         }
-
+        
+        // --- Event Listeners ---
         htmlUploader.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -408,6 +472,7 @@
         fabBtn.addEventListener('click', () => fabMenu.classList.toggle('hidden'));
         addProjectBtn.addEventListener('click', openAddProjectModal);
         replaceEmailBtn.addEventListener('click', () => emailModal.classList.remove('hidden'));
+        toggleEditBtn.addEventListener('click', toggleEditMode);
         
         const closeEditModal = () => editModal.classList.add('hidden');
         closeModalBtn.addEventListener('click', closeEditModal);
@@ -435,106 +500,9 @@
             else applyAddProject();
         });
 
-        function applyChangesToElement(doc) {
-             const targetElement = doc.querySelector(`[data-editor-id="${activeEditingElement.id}"]`);
-             if (!targetElement) return false;
-
-             // Handle Project specific changes
-             if(activeEditingElement.isProject){
-                 const projectItem = targetElement.closest('.portfolio-item') || targetElement;
-                 const titleEl = projectItem.querySelector('.portfolio-title');
-                 if(titleEl) titleEl.textContent = editText.value;
-
-                 const linkEl = projectItem.querySelector('a');
-                 if(linkEl) linkEl.href = editLink.value;
-
-                 const imageEl = projectItem.querySelector('img');
-                 if(imageEl) {
-                     if(newBase64Image) imageEl.src = newBase64Image;
-                     else if (editImageUrl.value.trim()) imageEl.src = editImageUrl.value.trim();
-                 }
-                 
-                 const category = newCategory.value.trim() || editCategory.value;
-                 projectItem.dataset.category = category.toLowerCase();
-                 
-             } else { // Handle generic element changes
-                 if(targetElement.textContent.trim() !== editText.value.trim()) targetElement.textContent = editText.value;
-                 const parentLink = targetElement.closest('a') || (targetElement.tagName === 'A' ? targetElement : null);
-                 if(parentLink && parentLink.href !== editLink.value.trim()) parentLink.href = editLink.value;
-                 if(targetElement.tagName === 'IMG') {
-                     if(newBase64Image) targetElement.src = newBase64Image;
-                     else if (editImageUrl.value.trim()) targetElement.src = editImageUrl.value.trim();
-                 }
-             }
-             return true;
-        }
-        
-        function handleNewCategory(doc){
-            const newCat = newCategory.value.trim();
-            if(!newCat) return;
-
-            const filterContainer = doc.querySelector('.portfolio-filter');
-            const newCatId = newCat.toLowerCase();
-            if(filterContainer && !doc.querySelector(`[data-filter="${newCatId}"]`)){
-                const lastButton = filterContainer.querySelector('button:last-of-type');
-                const newButton = doc.createElement('button');
-                newButton.className = 'filter-btn';
-                newButton.dataset.filter = newCatId;
-                newButton.textContent = newCat.charAt(0).toUpperCase() + newCat.slice(1);
-                filterContainer.appendChild(newButton);
-            }
-        }
-
-        function applyEditChanges() {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(currentHtmlContent, 'text/html');
-            
-            handleNewCategory(doc);
-            const success = applyChangesToElement(doc);
-
-            if (success) {
-                currentHtmlContent = doc.documentElement.outerHTML;
-                reloadIframe();
-                showToast('تم تطبيق التغييرات!', true);
-            } else { showToast('فشل العثور على العنصر.', false); }
-            closeEditModal();
-        }
-
-        function applyAddProject() {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(currentHtmlContent, 'text/html');
-            const portfolioGrid = doc.querySelector('.portfolio-grid');
-            const firstProject = portfolioGrid?.querySelector('.portfolio-item');
-            if(!firstProject){ showToast('لم يتم العثور على قسم المشاريع.', false); return; }
-            
-            handleNewCategory(doc);
-
-            const newProject = firstProject.cloneNode(true);
-            const category = newCategory.value.trim() || editCategory.value;
-            newProject.dataset.category = category.toLowerCase();
-            
-            const titleEl = newProject.querySelector('.portfolio-title');
-            if (titleEl) titleEl.textContent = editText.value || "عنوان جديد";
-
-            const linkEl = newProject.querySelector('a');
-            if (linkEl) linkEl.href = editLink.value || "#";
-
-            const imgEl = newProject.querySelector('img');
-            if (imgEl) {
-                imgEl.src = newBase64Image || editImageUrl.value.trim() || 'https://placehold.co/600x400/cccccc/ffffff?text=Image';
-            }
-            
-            newProject.setAttribute('data-editor-id', `el-${Date.now()}-new`);
-            portfolioGrid.appendChild(newProject);
-            currentHtmlContent = doc.documentElement.outerHTML;
-            reloadIframe(true);
-            showToast('تمت إضافة المشروع بنجاح!', true);
-            closeEditModal();
-        }
-
         applyEmailChangeBtn.addEventListener('click', () => {
             const newEmail = newEmailInput.value.trim();
-            if(!newEmail.includes('@')){ showCustomModal('بريد إلكتروني غير صالح', 'الرجاء إدخال بريد إلكتروني صحيح.'); return; }
+            if(!newEmail.includes('@')){ showCustomModal('Invalid Email', 'Please enter a valid email address.'); return; }
 
             const parser = new DOMParser();
             const doc = parser.parseFromString(currentHtmlContent, 'text/html');
@@ -551,31 +519,117 @@
                 if(link.textContent.includes('@')) link.textContent = newEmail;
                 count++;
             });
-
-            doc.querySelectorAll('.info-item p, .profile-title').forEach(p => {
-                if(p.textContent.includes('@')) {
-                    p.textContent = newEmail;
-                    count++;
+            
+            const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+            let node;
+            while(node = walker.nextNode()) {
+                if (node.nodeValue.includes('@')) {
+                   node.nodeValue = node.nodeValue.replace(/[\w.-]+@[\w.-]+\.\w+/g, newEmail);
+                   count++;
                 }
-            });
+            }
 
             if (count > 0) {
                 currentHtmlContent = doc.documentElement.outerHTML;
                 reloadIframe();
-                showToast(`تم تحديث البريد في ${count} مواضع بنجاح!`, true);
+                showToast(`Email updated in ${count} places successfully!`, true);
             } else {
-                showToast('لم يتم العثور على بريد FormSubmit أو أي بريد آخر للتغيير.', false);
+                showToast('FormSubmit email or any other email to change was not found.', false);
             }
             closeEmailModal();
         });
 
-        // Initialize on page load
+        // --- Change Application Logic ---
+        function applyChangesToElement(doc) {
+              const targetElement = doc.querySelector(`[data-editor-id="${activeEditingElement.id}"]`);
+              if (!targetElement) return false;
+
+              if(activeEditingElement.isProject){
+                  const projectItem = targetElement.closest('.portfolio-item') || targetElement;
+                  if(projectItem.querySelector('.portfolio-title')) projectItem.querySelector('.portfolio-title').textContent = editText.value;
+                  if(projectItem.querySelector('a')) projectItem.querySelector('a').href = editLink.value;
+                  if(projectItem.querySelector('img')) {
+                      projectItem.querySelector('img').src = newBase64Image || (editImageUrl.value.trim() || projectItem.querySelector('img').src);
+                  }
+                  projectItem.dataset.category = (newCategory.value.trim() || editCategory.value).toLowerCase();
+              } else {
+                  if(targetElement.tagName !== 'IMG') targetElement.textContent = editText.value;
+                  
+                  const parentLink = targetElement.closest('a') || (targetElement.tagName === 'A' ? targetElement : null);
+                  if(parentLink) parentLink.href = editLink.value;
+
+                  if(targetElement.tagName === 'IMG') {
+                      targetElement.src = newBase64Image || (editImageUrl.value.trim() || targetElement.src);
+                  }
+              }
+              return true;
+        }
+        
+        function handleNewCategory(doc){
+            const newCat = newCategory.value.trim();
+            if(!newCat) return;
+
+            const filterContainer = doc.querySelector('.portfolio-filter');
+            const newCatId = newCat.toLowerCase();
+            if(filterContainer && !doc.querySelector(`[data-filter="${newCatId}"]`)){
+                const newButton = doc.createElement('button');
+                newButton.className = 'filter-btn'; // Or appropriate class from template
+                newButton.dataset.filter = newCatId;
+                newButton.textContent = newCat.charAt(0).toUpperCase() + newCat.slice(1);
+                filterContainer.appendChild(newButton);
+            }
+        }
+
+        function applyEditChanges() {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(currentHtmlContent, 'text/html');
+            
+            handleNewCategory(doc);
+            const success = applyChangesToElement(doc);
+
+            if (success) {
+                currentHtmlContent = doc.documentElement.outerHTML;
+                reloadIframe();
+                showToast('Changes applied!', true);
+            } else { showToast('Failed to find the element.', false); }
+            closeEditModal();
+        }
+
+        function applyAddProject() {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(currentHtmlContent, 'text/html');
+            const portfolioGrid = doc.querySelector('.portfolio-grid');
+            const firstProject = portfolioGrid?.querySelector('.portfolio-item');
+            if(!firstProject){ showToast('Projects section not found.', false); return; }
+            
+            handleNewCategory(doc);
+
+            const newProject = firstProject.cloneNode(true);
+            newProject.dataset.category = (newCategory.value.trim() || editCategory.value).toLowerCase();
+            
+            if (newProject.querySelector('.portfolio-title')) newProject.querySelector('.portfolio-title').textContent = editText.value || "New Title";
+            if (newProject.querySelector('a')) newProject.querySelector('a').href = editLink.value || '#';
+            if (newProject.querySelector('img')) newProject.querySelector('img').src = newBase64Image || editImageUrl.value.trim() || 'https://placehold.co/600x400';
+            
+            // Generate a unique ID for the new element
+            newProject.setAttribute('data-editor-id', `el-${Date.now()}-new`);
+
+            portfolioGrid.prepend(newProject);
+            currentHtmlContent = doc.documentElement.outerHTML;
+            reloadIframe();
+            showToast('Project added successfully!', true);
+            closeEditModal();
+        }
+
+
+        // --- On Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            const today = new Date();
-            const monthName = months[today.getMonth()];
-            currentMonthElement.textContent = monthName;
+            const d = new Date();
+            currentMonthElement.textContent = months[d.getMonth()];
             initializeTheme();
         });
+
     </script>
 </body>
 </html>
+
